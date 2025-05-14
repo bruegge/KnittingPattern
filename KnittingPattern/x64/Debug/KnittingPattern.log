@@ -1,0 +1,5 @@
+﻿  Logic.cpp
+C:\Users\thoma\source\repos\KnittingPattern\Src\cpp\Logic.cpp(117,29): warning C4244: 'initializing': conversion from 'float' to 'unsigned int', possible loss of data
+  Texture.cpp
+  Generating Code...
+  KnittingPattern.vcxproj -> C:\Users\thoma\source\repos\KnittingPattern\x64\Debug\KnittingPattern.exe
