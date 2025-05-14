@@ -2,14 +2,30 @@
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 layout (binding = 0) uniform sampler2D inputImage;
-layout (binding = 1, rgba32f) uniform image2D outputImage;
+
+layout(std430, binding = 1) buffer WorkBufferSSBO
+{	
+	vec4 ssbo_workBuffer[];
+};
+
+uniform ivec2 u_bufferSize;
 
 shared vec3 color[64];
 
+
+uint getBufferIndex(uint x, uint y)
+{
+	return u_bufferSize.x * y + x;	
+}
+
+uint getBufferIndex()
+{
+	return getBufferIndex(gl_WorkGroupID.x, gl_WorkGroupID.y);
+}
+
 void main()
 {
-	ivec2 outputSize = imageSize(outputImage);
-	vec2 texCoord = vec2(gl_GlobalInvocationID.xy) / vec2(8,8) / vec2(outputSize);
+	vec2 texCoord = vec2(gl_GlobalInvocationID.xy) / vec2(8,8) / vec2(u_bufferSize);
 	color[gl_LocalInvocationIndex] = texture(inputImage, texCoord).xyz;
 		
 	barrier();
@@ -22,7 +38,7 @@ void main()
 			colorOut += color[i];
 		}
 		colorOut = (colorOut / 64);
-		vec4 result = vec4(color[0], 1);
-		imageStore(outputImage, ivec2(gl_WorkGroupID.xy), result + vec4(0,11111,1111,1111));
+		vec4 result = vec4(colorOut, 1);
+		ssbo_workBuffer[getBufferIndex()] = result;
 	}
 }

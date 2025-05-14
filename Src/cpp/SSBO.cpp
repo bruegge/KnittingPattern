@@ -34,7 +34,7 @@ GLuint SSBO::getID() const
 	return m_id;
 }
 
-void SSBO::changeSize(unsigned int bytes)
+void SSBO::changeSize(const glm::uvec2& size)
 {
 	if (m_id != 0)
 	{
@@ -42,11 +42,12 @@ void SSBO::changeSize(unsigned int bytes)
 	}
 	glGenBuffers(1, &m_id);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_id);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, bytes, nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, size.x * size.y * sizeof(float) * 4, nullptr, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	m_size = size;
 }
 
-unsigned int SSBO::getSize() const
+glm::uvec2 SSBO::getSize() const
 {
 	return m_size;
 }

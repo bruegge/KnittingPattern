@@ -88,7 +88,7 @@ void CModel::draw(const CShader& pShader, const CTexture& texture)
 	GLError::checkError();
 }
 
-void CModel::draw(const CShader& pShader, const CTexture& texture)
+void CModel::draw(const CShader& pShader, const SSBO& buffer)
 {
 	GLError::checkError();
 	pShader.bind();
@@ -119,12 +119,15 @@ void CModel::draw(const CShader& pShader, const CTexture& texture)
 	// Draw the triangle !
 	GLError::checkError();
 
-	if (texture.GetTextureID() != 0)
+	if (buffer.getID() != 0)
 	{
 		GLError::checkError();
-		texture.Link(&pShader, 0, "inputImage");
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffer.getID());
+		GLint location = glGetUniformLocation(pShader.getID(), "u_bufferSize");
+		int bufferWidth = buffer.getSize().x;
+		int bufferHeight = buffer.getSize().y;
+		glUniform2i(location, bufferWidth, bufferHeight);
 		GLError::checkError();
-		texture.Bind(0);
 		GLError::checkError();
 	}
 	GLError::checkError();

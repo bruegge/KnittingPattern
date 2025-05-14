@@ -21,6 +21,8 @@ public:
 	void bind() const;
 	void unBind() const;
 
+	void setConstant(const char* name, int value);
+
 private:
 	
 	GLuint ID;

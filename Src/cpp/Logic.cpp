@@ -115,7 +115,7 @@ void Logic::applyWorkTextureSizeChange()
 		float stitchRatio = m_stitchSize.x / m_stitchSize.y;
 		float inputRatio = static_cast<float>(inputHeight) / static_cast<float>(inputWidth);
 		unsigned int heightOutput = stitchRatio * inputRatio * static_cast<float>(m_columnStitchCount);
-		m_workTexture->changeSize(m_columnStitchCount, heightOutput);
+		m_workTexture->changeSize(glm::uvec2(m_columnStitchCount, heightOutput));
 		GLError::checkError();
 		applyWriteToWorkTexture();
 		GLError::checkError();
@@ -137,25 +137,18 @@ void Logic::applyWriteToWorkTexture()
 		m_inputTexture->Bind(0);
 		GLError::checkError();
 	}
-	if (m_inputTexture->GetTextureID() != 0)
+	if (m_workTexture->getID() != 0)
 	{
 		GLError::checkError();
-		glBindImageTexture(1,
-			m_workTexture->GetTextureID(),
-			0,
-			GL_FALSE,
-			1,
-			GL_WRITE_ONLY,
-			GL_RGBA32F);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_workTexture->getID());
+		GLint location = glGetUniformLocation(m_shaderRasterize->getID(), "u_bufferSize");
+		glUniform2i(location, m_workTexture->getSize().x, m_workTexture->getSize().y);
 		GLError::checkError();
 	}
 
-	unsigned int width = 0;
-	unsigned int height = 0;
-	m_workTexture->getTextureSize(width, height);
 	GLError::checkError();
 
-	glDispatchCompute(width, height, 1);
+	glDispatchCompute(m_workTexture->getSize().x, m_workTexture->getSize().y, 1);
 	GLError::checkError();
 
 	m_shaderRasterize->unBind();
