@@ -15,7 +15,6 @@ layout(std430, binding = 1) buffer ColorTableSSBO
 uniform int u_countAllColors;
 uniform int u_countColors;
 
-
 void main()
 {
 	if(gl_GlobalInvocationID.x < u_countAllColors)

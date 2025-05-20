@@ -3,6 +3,115 @@
 #include <iostream>
 #include <fstream>
 
+static glm::vec3 RGBtoXYZ(const glm::vec3& rgb)
+{
+	float var_R = rgb.x;
+	float var_G = rgb.y;
+	float var_B = rgb.z;
+
+	if (var_R > 0.04045f)
+		var_R = pow((var_R + 0.055f) / 1.055f, 2.4f);
+	else
+		var_R = var_R / 12.92f;
+	if (var_G > 0.04045f)
+		var_G = pow((var_G + 0.055f) / 1.055f, 2.4f);
+	else
+		var_G = var_G / 12.92f;
+	if (var_B > 0.04045f)
+		var_B = pow((var_B + 0.055f) / 1.055f, 2.4f);
+	else
+		var_B = var_B / 12.92f;
+
+	var_R = var_R * 100.0f;
+	var_G = var_G * 100.0f;
+	var_B = var_B * 100.0f;
+
+	float X = var_R * 0.4124f + var_G * 0.3576f + var_B * 0.1805f;
+	float Y = var_R * 0.2126f + var_G * 0.7152f + var_B * 0.0722f;
+	float Z = var_R * 0.0193f + var_G * 0.1192f + var_B * 0.9505f;
+	return glm::vec3(X, Y, Z);
+}
+
+static glm::vec3 LABtoXYZ(const glm::vec3& lab)
+{
+	float var_Y = (lab.x +16.0f) / 116.0f;
+	float var_X = lab.y / 500.0f + var_Y;
+	float var_Z = var_Y - lab.z / 200.0f;
+
+	if (pow(var_Y, 3.0f) > 0.008856f)
+		var_Y = pow(var_Y, 3.0f);
+	else
+		var_Y = (var_Y - 16.0f / 116.0f) / 7.787f;
+	if (pow(var_X, 3.0f) > 0.008856f)
+		var_X = pow(var_X, 3.0f);
+	else
+		var_X = (var_X - 16.0f / 116.0f) / 7.787f;
+	if (pow(var_Z, 3.0f) > 0.008856f)
+		var_Z = pow(var_Z, 3.0f);
+	else
+		var_Z = (var_Z - 16.0f / 116.0f) / 7.787f;
+
+	return glm::vec3(95.047f * var_X,
+		100.000f * var_Y,
+		108.883f * var_Z);
+}
+
+static glm::vec3 XYZtoRGB(const glm::vec3& xyz)
+{
+	float var_X = xyz.x / 100.0f;      //X from 0 to  95.047 
+	float var_Y = xyz.y / 100.0f;      //Y from 0 to 100.000
+	float var_Z = xyz.z / 100.0f;      //Z from 0 to 108.883
+
+	float var_R = var_X * 3.2406f + var_Y * -1.5372f + var_Z * -0.4986f;
+	float var_G = var_X * -0.9689f + var_Y * 1.8758f + var_Z * 0.0415f;
+	float var_B = var_X * 0.0557f + var_Y * -0.2040f + var_Z * 1.0570f;
+
+	if (var_R > 0.0031308f)
+		var_R = 1.055f * pow(var_R,(1.0f / 2.4f)) - 0.055f;
+	else
+		var_R = 12.92f * var_R;
+	if (var_G > 0.0031308f)
+		var_G = 1.055f * pow(var_G, (1.0f / 2.4f)) - 0.055f;
+	else
+		var_G = 12.92f * var_G;
+	if (var_B > 0.0031308f)
+		var_B = 1.055f * pow(var_B, (1.0f / 2.4f)) - 0.055f;
+	else
+		var_B = 12.92f * var_B;
+
+	return glm::vec3(var_R, var_G, var_B);
+}
+
+static glm::vec3 XYZtoLAB(const glm::vec3& xyz)
+{
+	float var_X = xyz.x / 95.047f;
+	float var_Y = xyz.y / 100.000f;
+	float var_Z = xyz.z / 108.883;
+
+	if (var_X > 0.008856f)
+		var_X = pow(var_X, 1.0f / 3.0f);
+	else
+		var_X = (7.787f * var_X) + (16.0f / 116.0f);
+	if (var_Y > 0.008856f)
+		var_Y = pow(var_Y, 1.0f / 3.0f);
+	else
+		var_Y = (7.787f * var_Y) + (16.0f / 116.0f);
+	if (var_Z > 0.008856f)
+		var_Z = pow(var_Z, 1.0f / 3.0f);
+	else
+		var_Z = (7.787f * var_Z) + (16.0f / 116.0f);
+
+	float L = (116.0f * var_Y) - 16.0f;
+	float a = 500.0f * (var_X - var_Y);
+	float b = 200.0f * (var_Y - var_Z);
+	return glm::vec3(L, a, b);
+}
+
+static std::string printVector(const glm::vec3& vec)
+{
+	return std::to_string(vec.x) + " " + std::to_string(vec.y) + " " + std::to_string(vec.z);
+}
+
 static void saveBMP(const std::string& file,
 	unsigned int width,
 	unsigned int height,
@@ -139,7 +248,10 @@ void Logic::openImage(const std::string& fileName)
 			std::map<unsigned int, bool>::const_iterator cit = colors.begin();
 			do
 			{
-				allColors[counter] = glm::ivec4((*cit).first >> 16, ((*cit).first >> 8) & 0xFF, (*cit).first & 0xFF, 0);
+				glm::vec3 rgb = glm::vec3((*cit).first >> 16, ((*cit).first >> 8) & 0xFF, (*cit).first & 0xFF) / 255.0f;
+				glm::vec3 xyz = RGBtoXYZ(rgb);
+				glm::vec3 lab = XYZtoLAB(xyz);
+				allColors[counter] = glm::ivec4(lab.x, lab.y, lab.z, 0);
 				cit++;
 				counter++;
 			} while (cit != colors.cend());
@@ -207,9 +319,12 @@ void Logic::saveResult(const std::string& fileNameIn)
 			unsigned char green = 0;
 			unsigned char blue = 0;
 
-			red = static_cast<unsigned char>(colorTable[pixel.a].x);
-			green = static_cast<unsigned char>(colorTable[pixel.a].y);
-			blue = static_cast<unsigned char>(colorTable[pixel.a].z);
+			glm::ivec4 labColor = colorTable[pixel.a];
+			glm::vec3 rgb = XYZtoRGB(LABtoXYZ(glm::vec3(labColor.x, labColor.y, labColor.z)));
+			glm::ivec4 color = glm::ivec4(rgb.x * 255, rgb.y * 255, rgb.z * 255, 0);
+			red = static_cast<unsigned char>(color.x);
+			green = static_cast<unsigned char>(color.y);
+			blue = static_cast<unsigned char>(color.z);
 
 			if ((x % pixelWidth) == 0 || (y % pixelHeight) == 0)
 			{

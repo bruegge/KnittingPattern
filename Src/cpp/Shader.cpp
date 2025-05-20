@@ -89,7 +89,6 @@ GLuint CreateShaderProgram(const char* pVertex_file_path, const char* pTessContr
 	if (pFragment_file_path) { nFragmentShaderID = CreateShader(GL_FRAGMENT_SHADER, pFragment_file_path); }
 
 	// Link the program
-	printf("Linking program\n");
 	GLuint nProgramID = glCreateProgram();
 	if (pVertex_file_path) { glAttachShader(nProgramID, nVertexShaderID); }
 	if (pTessControl_file_path) { glAttachShader(nProgramID, nTessControlShaderID); }
@@ -135,7 +134,6 @@ GLuint CreateShaderProgram(const char* pComputeShader_file_path)
 	nComputeShaderID = CreateShader(GL_COMPUTE_SHADER, pComputeShader_file_path); 
 	
 	// Link the program
-	printf("Linking program\n");
 	GLuint nProgramID = glCreateProgram();
 	glAttachShader(nProgramID, nComputeShaderID);
 	glLinkProgram(nProgramID);

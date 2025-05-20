@@ -117,7 +117,6 @@ void GameLoop()
 						std::string fileName = "";
 						if (openFileDialog(fileName))
 						{
-							std::cout << "Open file:" << fileName << std::endl;
 							pLogic->openImage(fileName);
 						}
 					}
@@ -126,7 +125,6 @@ void GameLoop()
 						std::string fileName = "";
 						if (saveFileDialog(fileName))
 						{
-							std::cout << "Save Result:" << fileName << std::endl;
 							pLogic->saveResult(fileName);
 						}
 					}
@@ -195,7 +193,7 @@ void GameLoop()
 				ImGui::TreePop();
 			}
 			{
-				ImGui::ShowDemoWindow();
+				//ImGui::ShowDemoWindow();
 			}
 			ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
 			GLError::checkError();

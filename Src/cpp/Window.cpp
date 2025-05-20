@@ -34,9 +34,6 @@ Window::Window(unsigned int nWidth, unsigned int nHeight, const std::string& win
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
-
-	std::cout << "Window creation successful" << std::endl;
-
 }
 
 Window::~Window()
