@@ -12,8 +12,12 @@ public:
 	CModel(); //usual constructor with generating VAO / VBO / IBO
 	~CModel();
 
-	void draw(const CShader& pShader, const CTexture& texture); //draw the model with respect to the camera
-	void draw(const CShader& pShader, const SSBO& texture); //draw the model with respect to the camera
+	void draw(const CShader& pShader, 
+		const SSBO& texture, 
+		const SSBO& colors,
+		const glm::vec4& gridColor,
+		const glm::vec4& gridHighlightColor); //draw the model with respect to the camera
+	
 	struct SDataVBO //structure of a single vertex
 	{
 		SDataVBO() 
@@ -38,10 +42,11 @@ public:
 		GLfloat Position[3];
 	};
 
-	static CModel* createImageFrame();
+	static CModel* createImageFrame(unsigned int rowCount = 1, unsigned int columnCount = 1);
 
 	void SetVBOandIBOData(const std::vector<SDataVBO>& pvVBO);
 	
+	void changeResolution(unsigned int rowCount, unsigned int columnCount);
 	
 private:
 

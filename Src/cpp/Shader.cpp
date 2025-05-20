@@ -148,6 +148,7 @@ GLuint CreateShaderProgram(const char* pComputeShader_file_path)
 	glGetProgramiv(nProgramID, GL_INFO_LOG_LENGTH, &nInfoLogLength);
 	if (nInfoLogLength > 1)
 	{
+		std::cout << pComputeShader_file_path << std::endl;
 		std::vector<char> vecProgramErrorMessage(nInfoLogLength + 1);
 		glGetProgramInfoLog(nProgramID, nInfoLogLength, NULL, &vecProgramErrorMessage[0]);
 		printf("%s\n", &vecProgramErrorMessage[0]);

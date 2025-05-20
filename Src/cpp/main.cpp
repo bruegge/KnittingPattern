@@ -44,7 +44,7 @@ static bool saveFileDialog(std::string& fileNameOut)
 	ofn.lpstrFile = Buffer;
 	ofn.nMaxFile = 300;
 	ofn.Flags = OFN_EXPLORER;
-	ofn.lpstrFilter = NULL;
+	ofn.lpstrFilter = ".bmp";
 	ofn.lpstrCustomFilter = NULL;
 	ofn.nFilterIndex = 0;
 	ofn.lpstrFileTitle = NULL;
@@ -107,27 +107,35 @@ void GameLoop()
 
 		{
 			ImGui::Begin("Settings");
-			GLError::checkError();
-			if (ImGui::Button("Open Image"))
+
+			if (ImGui::BeginMainMenuBar())
 			{
-				std::string fileName = "";
-				if (openFileDialog(fileName))
+				if (ImGui::BeginMenu("File"))
 				{
-					std::cout << "Open file:" << fileName << std::endl;
-					pLogic->openImage(fileName);
+					if (ImGui::MenuItem("Open"))
+					{
+						std::string fileName = "";
+						if (openFileDialog(fileName))
+						{
+							std::cout << "Open file:" << fileName << std::endl;
+							pLogic->openImage(fileName);
+						}
+					}
+					if (ImGui::MenuItem("Save", "Ctrl+S"))
+					{
+						std::string fileName = "";
+						if (saveFileDialog(fileName))
+						{
+							std::cout << "Save Result:" << fileName << std::endl;
+							pLogic->saveResult(fileName);
+						}
+					}
+					ImGui::EndMenu();
 				}
-			}
+				ImGui::EndMainMenuBar();
+			}						
 			GLError::checkError();
-			if (ImGui::Button("Save Result"))
-			{
-				std::string fileName = "";
-				if (saveFileDialog(fileName))
-				{
-					std::cout << "Save Result:" << fileName << std::endl;
-					pLogic->saveResult(fileName);
-				}
-			}
-			GLError::checkError();
+			
 			//stitchSize
 			{
 				glm::vec2 stitchSizeVec = pLogic->getStitchSize();
@@ -148,18 +156,52 @@ void GameLoop()
 			//numberOfStitchColumns
 			{
 				int columnStitchCount = static_cast<int>(pLogic->getColumnStitchCount());
-				ImGui::SliderInt("Number of stitch columns", &columnStitchCount, 2, 100);
+				ImGui::SliderInt("Number of stitch columns", &columnStitchCount, 2, 500);
 				pLogic->changeColumnStitchCount(static_cast<unsigned int>(columnStitchCount));
 			}
+			//mirror
+			{
+				glm::ivec2 mirror = pLogic->getMirror();
+				bool vertical = mirror.x == 1 ? true : false;
+				bool horizontal = mirror.y == 1 ? true : false;
+				ImGui::Checkbox("Mirror vertical", &vertical);
+				ImGui::Checkbox("Mirror horizontal", &horizontal);
+				mirror.x = vertical ? 1 : 0;
+				mirror.y = horizontal ? 1 : 0;
+				pLogic->setMirror(mirror);
+			}
 			GLError::checkError();
-
-
+			if (ImGui::CollapsingHeader("Grid colors"))
+			{
+				ImGui::TreePush();
+				//gridColorPicker
+				{
+					glm::vec4 gridColor = pLogic->getGridColor();
+					float colors[3] = { gridColor.x, gridColor.y, gridColor.z };
+					ImGui::ColorEdit3("Grid color", colors);
+					ImGui::SliderFloat("Opacity", &gridColor.a, 0.0f, 1.0f);
+					gridColor = glm::vec4(colors[0], colors[1], colors[2], gridColor.a);
+					pLogic->setGridColor(gridColor);
+				}
+				//gridHighlightColorPicker
+				{
+					glm::vec4 gridColor = pLogic->getGridHighlightColor();
+					float colors[3] = { gridColor.x, gridColor.y, gridColor.z };
+					ImGui::ColorEdit3("Grid highlight color", colors);
+					ImGui::SliderFloat("Highlight opacity", &gridColor.a, 0.0f, 1.0f);
+					gridColor = glm::vec4(colors[0], colors[1], colors[2], gridColor.a);
+					pLogic->setGridHighlightColor(gridColor);
+				}
+				ImGui::TreePop();
+			}
+			{
+				ImGui::ShowDemoWindow();
+			}
 			ImGui::Text("(%.1f FPS)", ImGui::GetIO().Framerate);
 			GLError::checkError();
 			ImGui::End();
 			GLError::checkError();
 		}
-
 
 		GLError::checkError();
 		ImGui::Render();

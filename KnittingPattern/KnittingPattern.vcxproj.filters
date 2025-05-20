@@ -106,5 +106,14 @@
     <None Include="..\Src\shaders\CS_Rasterize.glsl">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="..\Src\shaders\CS_KMeansAssignment.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\Src\shaders\CS_KMeansUpdating.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="..\Src\shaders\CS_KMeansAtomicAdd.glsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
